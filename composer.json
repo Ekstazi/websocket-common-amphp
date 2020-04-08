@@ -1,0 +1,49 @@
+{
+  "name": "ekstazi/websocket-common-amphp",
+  "description": "amphp/websocket adapter implementation for stream interfaces",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Maxim Furtuna",
+      "email": "ekstazyst@gmail.com"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/ekstazi/websocket-common-amphp/issues"
+  },
+  "keywords": [
+    "async",
+    "non-blocking",
+    "websocket",
+    "stream",
+    "http",
+    "amp",
+    "amphp"
+  ],
+  "require": {
+    "php": ">=7.2",
+    "amphp/websocket": "^1.0@RC"
+  },
+  "require-dev": {
+    "amphp/phpunit-util": "^1.1",
+    "amphp/php-cs-fixer-config": "dev-master",
+    "phpunit/phpunit": "^8 || ^7",
+    "dg/bypass-finals": "^1.1"
+  },
+  "minimum-stability": "RC",
+  "autoload": {
+    "psr-4": {
+      "ekstazi\\websocket\\common\\amphp\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "ekstazi\\websocket\\common\\amphp\\test\\": "test"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit",
+    "test-coverage": "phpdbg -qrr vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml",
+    "lint": "php vendor/bin/php-cs-fixer --diff  -v fix"
+  }
+}
