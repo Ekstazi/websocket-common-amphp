@@ -6,6 +6,7 @@ use Amp\ByteStream\InputStream;
 use Amp\ByteStream\OutputStream;
 use Amp\PHPUnit\AsyncTestCase;
 use Amp\Success;
+use Amp\Websocket\Client;
 use DG\BypassFinals;
 use ekstazi\websocket\common\amphp\Reader;
 use ekstazi\websocket\common\amphp\Stream;
@@ -17,6 +18,14 @@ class StreamTest extends AsyncTestCase
     {
         parent::__construct($name, $data, $dataName);
         BypassFinals::enable();
+    }
+
+    public function testCreate()
+    {
+        $client = $this->createStub(Client::class);
+        $stream = Stream::create($client, Writer::MODE_BINARY);
+        self::assertInstanceOf(Stream::class, $stream);
+        self::assertEquals(Writer::MODE_BINARY, $stream->getMode());
     }
 
     public function testConstruct()

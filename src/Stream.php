@@ -5,6 +5,7 @@ namespace ekstazi\websocket\common\amphp;
 use Amp\ByteStream\InputStream;
 use Amp\ByteStream\OutputStream;
 use Amp\Promise;
+use Amp\Websocket\Client;
 
 final class Stream implements InputStream, OutputStream
 {
@@ -55,5 +56,19 @@ final class Stream implements InputStream, OutputStream
     public function end(string $finalData = ""): Promise
     {
         return $this->writer->end($finalData);
+    }
+
+    /**
+     * Create stream from client.
+     * @param Client $client
+     * @param string $mode
+     * @return static
+     */
+    public static function create(Client $client, string $mode = Writer::MODE_BINARY): self
+    {
+        return new static(
+            new Reader($client),
+            new Writer($client, $mode)
+        );
     }
 }

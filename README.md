@@ -18,7 +18,8 @@ use ekstazi\websocket\common\amphp\Writer;
 /** @var \Amp\Websocket\Client $client */
 $stream = new Stream(new Reader($client), new Writer($client));
 $stream->setMode(Writer::MODE_TEXT);
-
+// alternative way to create stream
+// $stream = Stream::create($client, Writer::MODE_TEXT);
 yield $stream->read();
 yield $stream->write('test');
 ```
