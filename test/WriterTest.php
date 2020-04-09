@@ -27,35 +27,6 @@ class WriterTest extends AsyncTestCase
     }
 
 
-    /**
-     * @dataProvider writeProvider
-     * @param string $mode
-     */
-    public function testDefaultMode(string $mode)
-    {
-        $client = $this->createStub(Client::class);
-        $writer = new Writer($client, Writer::MODE_BINARY);
-        $writer->setDefaultMode($mode);
-        self::assertEquals($mode, $writer->getDefaultMode());
-    }
-
-    public function testInvalidMode()
-    {
-        $client = $this->createStub(Client::class);
-        $writer = new Writer($client, Writer::MODE_BINARY);
-        $this->expectException(\InvalidArgumentException::class);
-        $writer->setDefaultMode('error');
-    }
-
-    public function testInvalidWriteMode()
-    {
-        $client = $this->createStub(Client::class);
-        $writer = new Writer($client);
-        $this->expectException(\InvalidArgumentException::class);
-        $writer->write('test', 'error');
-    }
-
-
     private function stubClientWrite(string $data, string $mode, $returnValue = null): Client
     {
         $returnValue = $returnValue ?? new Success();

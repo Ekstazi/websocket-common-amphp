@@ -43,6 +43,7 @@ class ReaderTest extends AsyncTestCase
     /**
      * Test that data readed from websocket client.
      * @return \Generator
+     * @throws
      */
     public function testReadSuccess()
     {
@@ -62,6 +63,7 @@ class ReaderTest extends AsyncTestCase
     /**
      * Test that null returned when websocket client was closed.
      * @return \Generator
+     * @throws
      */
     public function testReadClose()
     {
@@ -75,6 +77,7 @@ class ReaderTest extends AsyncTestCase
     /**
      * Test that null returned when websocket client was closed.
      * @return \Generator
+     * @throws
      */
     public function testReadCloseError()
     {
