@@ -16,7 +16,7 @@ use ekstazi\websocket\common\amphp\Connection;
 use ekstazi\websocket\common\amphp\Writer;
 
 /** @var \Amp\Websocket\Client $client */
-$stream = new Connection(new Reader($client), new Writer($client));
+$stream = new Connection(new Reader($client), new Writer($client), $client);
 $stream->setDefaultMode(Writer::MODE_TEXT);
 // alternative way to create stream
 // $stream = Connection::create($client, Writer::MODE_TEXT);

@@ -19,11 +19,22 @@ final class Connection implements ConnectionInterface
      * @var Reader
      */
     private $reader;
+    /**
+     * @var \Amp\Socket\SocketAddress
+     */
+    private $remoteAddress;
 
-    public function __construct(ReaderInterface $reader, WriterInterface $writer)
+    /**
+     * @var int
+     */
+    private $id;
+
+    public function __construct(ReaderInterface $reader, WriterInterface $writer, Client $client)
     {
         $this->reader = $reader;
         $this->writer = $writer;
+        $this->id = $client->getId();
+        $this->remoteAddress = $client->getRemoteAddress();
     }
 
     public function setDefaultMode(string $defaultMode): void
@@ -62,24 +73,25 @@ final class Connection implements ConnectionInterface
     /**
      * Create stream from client.
      * @param Client $client
-     * @param string $mode
+     * @param string $defaultMode
      * @return static
      */
-    public static function create(Client $client, string $mode = Writer::MODE_BINARY): self
+    public static function create(Client $client, string $defaultMode = Writer::MODE_BINARY): self
     {
         return new static(
             new Reader($client),
-            new Writer($client, $mode)
+            new Writer($client, $defaultMode),
+            $client
         );
     }
 
     public function getId(): int
     {
-        // TODO: Implement getId() method.
+        return $this->id;
     }
 
     public function getRemoteAddress(): string
     {
-        // TODO: Implement getRemoteAddress() method.
+        return $this->remoteAddress;
     }
 }

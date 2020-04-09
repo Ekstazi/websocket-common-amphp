@@ -5,6 +5,7 @@ namespace ekstazi\websocket\common\amphp\test;
 use Amp\ByteStream\InputStream;
 use Amp\ByteStream\OutputStream;
 use Amp\PHPUnit\AsyncTestCase;
+use Amp\Socket\SocketAddress;
 use Amp\Success;
 use Amp\Websocket\Client;
 use ekstazi\websocket\common\amphp\Connection;
@@ -20,7 +21,7 @@ class ConnectionTest extends AsyncTestCase
 
     public function testCreate()
     {
-        $client = $this->createStub(Client::class);
+        $client = $this->createClient();
         $stream = Connection::create($client, Writer::MODE_BINARY);
         self::assertInstanceOf(Connection::class, $stream);
         self::assertEquals(Writer::MODE_BINARY, $stream->getDefaultMode());
@@ -30,8 +31,8 @@ class ConnectionTest extends AsyncTestCase
     {
         $reader = $this->createStub(Reader::class);
         $writer = $this->createStub(Writer::class);
-
-        $stream = new Connection($reader, $writer);
+        $client = $this->createClient();
+        $stream = new Connection($reader, $writer, $client);
 
         self::assertInstanceOf(InputStream::class, $stream);
         self::assertInstanceOf(OutputStream::class, $stream);
@@ -46,8 +47,9 @@ class ConnectionTest extends AsyncTestCase
             ->method('end')
             ->with('test')
             ->willReturn(new Success());
+        $client = $this->createClient();
 
-        $stream = new Connection($reader, $writer);
+        $stream = new Connection($reader, $writer, $client);
         yield $stream->end('test');
     }
 
@@ -59,7 +61,9 @@ class ConnectionTest extends AsyncTestCase
             ->willReturn(new Success('test'));
 
         $writer = $this->createStub(Writer::class);
-        $stream = new Connection($reader, $writer);
+        $client = $this->createClient();
+
+        $stream = new Connection($reader, $writer, $client);
         $data = yield $stream->read();
 
         self::assertEquals('test', $data);
@@ -75,7 +79,9 @@ class ConnectionTest extends AsyncTestCase
             ->with('test')
             ->willReturn(new Success());
 
-        $stream = new Connection($reader, $writer);
+        $client = $this->createClient();
+
+        $stream = new Connection($reader, $writer, $client);
         yield $stream->write('test');
     }
 
@@ -88,7 +94,9 @@ class ConnectionTest extends AsyncTestCase
             ->method('setDefaultMode')
             ->with(Writer::MODE_TEXT);
 
-        $stream = new Connection($reader, $writer);
+        $client = $this->createClient();
+
+        $stream = new Connection($reader, $writer, $client);
         $stream->setDefaultMode(Writer::MODE_TEXT);
     }
 
@@ -101,7 +109,46 @@ class ConnectionTest extends AsyncTestCase
             ->method('getDefaultMode')
             ->willReturn(Writer::MODE_TEXT);
 
-        $stream = new Connection($reader, $writer);
+        $client = $this->createClient();
+
+        $stream = new Connection($reader, $writer, $client);
         self::assertEquals(Writer::MODE_TEXT, $stream->getDefaultMode());
+    }
+
+    public function testGetRemoteAddress()
+    {
+        $reader = $this->createStub(Reader::class);
+        $writer = $this->createStub(Writer::class);
+        $client = $this->createClient();
+
+        $stream = new Connection($reader, $writer, $client);
+        self::assertEquals('127.0.0.1:8000', $stream->getRemoteAddress());
+    }
+
+    public function testGetId()
+    {
+        $reader = $this->createStub(Reader::class);
+        $writer = $this->createStub(Writer::class);
+        $client = $this->createClient();
+
+        $stream = new Connection($reader, $writer, $client);
+        self::assertEquals('1', $stream->getId());
+    }
+
+    /**
+     * @return Client
+     */
+    private function createClient(): Client
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())
+            ->method('getRemoteAddress')
+            ->willReturn(new SocketAddress('127.0.0.1', '8000'));
+
+        $client->expects(self::once())
+            ->method('getId')
+            ->willReturn(1);
+
+        return $client;
     }
 }
