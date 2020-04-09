@@ -23,7 +23,7 @@ class WriterTest extends AsyncTestCase
         $client = $this->createStub(Client::class);
         $writer = new Writer($client, $mode);
         self::assertInstanceOf(OutputStream::class, $writer);
-        self::assertEquals($mode, $writer->getMode());
+        self::assertEquals($mode, $writer->getDefaultMode());
     }
 
 
@@ -31,12 +31,12 @@ class WriterTest extends AsyncTestCase
      * @dataProvider writeProvider
      * @param string $mode
      */
-    public function testMode(string $mode)
+    public function testDefaultMode(string $mode)
     {
         $client = $this->createStub(Client::class);
         $writer = new Writer($client, Writer::MODE_BINARY);
-        $writer->setMode($mode);
-        self::assertEquals($mode, $writer->getMode());
+        $writer->setDefaultMode($mode);
+        self::assertEquals($mode, $writer->getDefaultMode());
     }
 
     public function testInvalidMode()
@@ -44,8 +44,17 @@ class WriterTest extends AsyncTestCase
         $client = $this->createStub(Client::class);
         $writer = new Writer($client, Writer::MODE_BINARY);
         $this->expectException(\InvalidArgumentException::class);
-        $writer->setMode('error');
+        $writer->setDefaultMode('error');
     }
+
+    public function testInvalidWriteMode()
+    {
+        $client = $this->createStub(Client::class);
+        $writer = new Writer($client);
+        $this->expectException(\InvalidArgumentException::class);
+        $writer->write('test', 'error');
+    }
+
 
     private function stubClientWrite(string $data, string $mode, $returnValue = null): Client
     {
@@ -87,9 +96,7 @@ class WriterTest extends AsyncTestCase
     {
         $client = $this->stubClientWrite('test', $mode);
         $connection = new Writer($client);
-        $connection->setMode($mode);
-        $promise = $connection->write('test');
-        self::assertInstanceOf(Success::class, $promise);
+        yield $connection->write('test', $mode);
     }
 
     /**
@@ -103,9 +110,8 @@ class WriterTest extends AsyncTestCase
     {
         $client = $this->stubClientWrite('test', $mode, new Failure(new ClosedException('test', 1000, 'test reason')));
         $connection = new Writer($client);
-        $connection->setMode($mode);
-        $this->expectException(ClosedException::class);
-        yield $connection->write('test');
+        $this->expectException(\Amp\ByteStream\ClosedException::class);
+        yield $connection->write('test', $mode);
     }
 
     /**
@@ -121,8 +127,8 @@ class WriterTest extends AsyncTestCase
             ->method('close')
             ->willReturn(new Success());
 
-        $writer = new Writer($client, $mode);
-        $promise = $writer->end('test');
+        $writer = new Writer($client);
+        $promise = $writer->end('test', $mode);
         self::assertInstanceOf(Promise::class, $promise);
     }
 

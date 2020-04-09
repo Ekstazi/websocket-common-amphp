@@ -2,12 +2,13 @@
 
 namespace ekstazi\websocket\common\amphp;
 
-use Amp\ByteStream\InputStream;
-use Amp\ByteStream\OutputStream;
 use Amp\Promise;
 use Amp\Websocket\Client;
+use ekstazi\websocket\common\Connection as ConnectionInterface;
+use ekstazi\websocket\common\Reader as ReaderInterface;
+use ekstazi\websocket\common\Writer as WriterInterface;
 
-final class Stream implements InputStream, OutputStream
+final class Connection implements ConnectionInterface
 {
     /**
      * @var Writer
@@ -19,20 +20,20 @@ final class Stream implements InputStream, OutputStream
      */
     private $reader;
 
-    public function __construct(Reader $reader, Writer $writer)
+    public function __construct(ReaderInterface $reader, WriterInterface $writer)
     {
         $this->reader = $reader;
         $this->writer = $writer;
     }
 
-    public function setMode(string $mode)
+    public function setDefaultMode(string $defaultMode): void
     {
-        $this->writer->setMode($mode);
+        $this->writer->setDefaultMode($defaultMode);
     }
 
-    public function getMode(): string
+    public function getDefaultMode(): string
     {
-        return $this->writer->getMode();
+        return $this->writer->getDefaultMode();
     }
     /**
      * @inheritDoc
@@ -45,7 +46,7 @@ final class Stream implements InputStream, OutputStream
     /**
      * @inheritDoc
      */
-    public function write(string $data): Promise
+    public function write(string $data, string $mode = null): Promise
     {
         return $this->writer->write($data);
     }
@@ -53,7 +54,7 @@ final class Stream implements InputStream, OutputStream
     /**
      * @inheritDoc
      */
-    public function end(string $finalData = ""): Promise
+    public function end(string $finalData = "", string $mode = null): Promise
     {
         return $this->writer->end($finalData);
     }
@@ -70,5 +71,15 @@ final class Stream implements InputStream, OutputStream
             new Reader($client),
             new Writer($client, $mode)
         );
+    }
+
+    public function getId(): int
+    {
+        // TODO: Implement getId() method.
+    }
+
+    public function getRemoteAddress(): string
+    {
+        // TODO: Implement getRemoteAddress() method.
     }
 }

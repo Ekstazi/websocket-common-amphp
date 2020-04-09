@@ -2,6 +2,7 @@
 
 namespace ekstazi\websocket\common\amphp\test;
 
+use Amp\ByteStream\ClosedException as BaseClosedException;
 use Amp\ByteStream\InMemoryStream;
 use Amp\ByteStream\InputStream;
 use Amp\ByteStream\Payload;
@@ -80,7 +81,7 @@ class ReaderTest extends AsyncTestCase
         $connection = $this->stubRead(new Failure(new ClosedException('test', 1000, 'test')));
 
         $connection = new Reader($connection);
-        $this->expectException(ClosedException::class);
+        $this->expectException(BaseClosedException::class);
         $data = yield $connection->read();
     }
 }

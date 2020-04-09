@@ -22,13 +22,13 @@
   ],
   "require": {
     "php": ">=7.2",
-    "amphp/websocket": "^1.0@RC"
+    "amphp/websocket": "^1.0@RC",
+    "ekstazi/websocket-common": "^2.0"
   },
   "require-dev": {
     "amphp/phpunit-util": "^1.1",
     "amphp/php-cs-fixer-config": "dev-master",
-    "phpunit/phpunit": "^8 || ^7",
-    "dg/bypass-finals": "^1.1"
+    "phpunit/phpunit": "^8 || ^7"
   },
   "minimum-stability": "RC",
   "autoload": {

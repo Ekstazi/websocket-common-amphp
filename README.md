@@ -12,14 +12,14 @@ PHP 7.2+
 <?php
 
 use ekstazi\websocket\common\amphp\Reader;
-use ekstazi\websocket\common\amphp\Stream;
+use ekstazi\websocket\common\amphp\Connection;
 use ekstazi\websocket\common\amphp\Writer;
 
 /** @var \Amp\Websocket\Client $client */
-$stream = new Stream(new Reader($client), new Writer($client));
-$stream->setMode(Writer::MODE_TEXT);
+$stream = new Connection(new Reader($client), new Writer($client));
+$stream->setDefaultMode(Writer::MODE_TEXT);
 // alternative way to create stream
-// $stream = Stream::create($client, Writer::MODE_TEXT);
+// $stream = Connection::create($client, Writer::MODE_TEXT);
 yield $stream->read();
 yield $stream->write('test');
 ```

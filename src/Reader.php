@@ -2,15 +2,17 @@
 
 namespace ekstazi\websocket\common\amphp;
 
-use Amp\ByteStream\InputStream;
+use Amp\ByteStream\ClosedException as BaseClosedException;
 use Amp\ByteStream\IteratorStream;
 use Amp\Iterator;
 use Amp\Producer;
 use Amp\Promise;
 use Amp\Websocket\Client;
+use Amp\Websocket\ClosedException;
 use Amp\Websocket\Message;
+use ekstazi\websocket\common\Reader as ReaderInterface;
 
-final class Reader implements InputStream
+final class Reader implements ReaderInterface
 {
 
     /**
@@ -24,7 +26,7 @@ final class Reader implements InputStream
     }
 
     /**
-     * @return Promise
+     * @inheritDoc
      */
     public function read(): Promise
     {
@@ -34,11 +36,15 @@ final class Reader implements InputStream
     private function createReader(Client $client): Iterator
     {
         return new Producer(function ($emit) use ($client) {
-            /** @var Message $message */
-            while ($message = yield $client->receive()) {
-                while (null !== $chunk = yield $message->read()) {
-                    yield $emit($chunk);
+            try {
+                /** @var Message $message */
+                while ($message = yield $client->receive()) {
+                    while (null !== $chunk = yield $message->read()) {
+                        yield $emit($chunk);
+                    }
                 }
+            } catch (ClosedException $exception) {
+                throw new BaseClosedException($exception->getMessage(), $exception->getCode(), $exception);
             }
         });
     }
