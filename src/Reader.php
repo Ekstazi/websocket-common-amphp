@@ -9,6 +9,7 @@ use Amp\Producer;
 use Amp\Promise;
 use Amp\Websocket\Client;
 use Amp\Websocket\ClosedException;
+use Amp\Websocket\Code;
 use Amp\Websocket\Message;
 use ekstazi\websocket\common\Reader as ReaderInterface;
 
@@ -42,6 +43,9 @@ final class Reader implements ReaderInterface
                     while (null !== $chunk = yield $message->read()) {
                         yield $emit($chunk);
                     }
+                }
+                if ($client->getCloseCode() != Code::NORMAL_CLOSE) {
+                    throw new BaseClosedException($client->getCloseReason(), $client->getCloseCode());
                 }
             } catch (ClosedException $exception) {
                 throw new BaseClosedException($exception->getMessage(), $exception->getCode(), $exception);

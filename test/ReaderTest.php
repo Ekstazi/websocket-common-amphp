@@ -12,6 +12,7 @@ use Amp\Promise;
 use Amp\Success;
 use Amp\Websocket\Client;
 use Amp\Websocket\ClosedException;
+use Amp\Websocket\Code;
 use ekstazi\websocket\common\amphp\Reader;
 
 class ReaderTest extends AsyncTestCase
@@ -82,6 +83,27 @@ class ReaderTest extends AsyncTestCase
     public function testReadCloseError()
     {
         $connection = $this->stubRead(new Failure(new ClosedException('test', 1000, 'test')));
+
+        $connection = new Reader($connection);
+        $this->expectException(BaseClosedException::class);
+        $data = yield $connection->read();
+    }
+
+    /**
+     * Test that null returned when websocket client was closed.
+     * @return \Generator
+     * @throws
+     */
+    public function testReadNormalCloseError()
+    {
+        $connection = $this->stubRead(new Success(null));
+        $connection->expects(self::atLeastOnce())
+            ->method('getCloseCode')
+            ->willReturn(Code::UNEXPECTED_SERVER_ERROR);
+
+        $connection->expects(self::once())
+            ->method('getCloseReason')
+            ->willReturn('test');
 
         $connection = new Reader($connection);
         $this->expectException(BaseClosedException::class);
