@@ -42,7 +42,10 @@ class WriterTest extends AsyncTestCase
 
         }
         $connection = $this->createMock(Client::class);
-
+        $connection
+            ->expects(self::atLeastOnce())
+            ->method('isConnected')
+            ->willReturn(true);
         $connection
             ->expects(self::once())
             ->method($mainMethod)
@@ -80,6 +83,26 @@ class WriterTest extends AsyncTestCase
     public function testWriteError(string $mode)
     {
         $client = $this->stubClientWrite('test', $mode, new Failure(new ClosedException('test', 1000, 'test reason')));
+        $connection = new Writer($client);
+        $this->expectException(\Amp\ByteStream\ClosedException::class);
+        yield $connection->write('test', $mode);
+    }
+
+    /**
+     * Test write method with data and different modes.
+     * @param string $mode
+     * @dataProvider writeProvider
+     * @return \Generator
+     * @throws
+     */
+    public function testWriteNormalClosedError(string $mode)
+    {
+        $client = $this->createMock(Client::class);
+        $client->expects(self::once())
+            ->method('isConnected')
+            ->willReturn(false);
+
+
         $connection = new Writer($client);
         $this->expectException(\Amp\ByteStream\ClosedException::class);
         yield $connection->write('test', $mode);

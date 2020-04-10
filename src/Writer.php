@@ -32,6 +32,9 @@ final class Writer implements WriterInterface
     {
         $mode = $mode ?? $this->defaultMode;
         $this->guardValidMode($mode);
+        if (!$this->client->isConnected()) {
+            throw new BaseClosedException("Connection closed with reason: " . $this->client->getCloseReason(), $this->client->getCloseCode());
+        }
         return call(function () use ($data, $mode) {
             try {
                 switch ($mode) {
